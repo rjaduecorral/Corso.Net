@@ -9,6 +9,19 @@ namespace Esercizi.Net.ConsoleApp
 {
     public class Program
     {
+        private static TransactionManager _transactionManager = null;
+        public static TransactionManager TransactionManager
+        {
+            get
+            {
+                if (_transactionManager == null)
+                {
+                    _transactionManager = new TransactionManager();
+                }
+
+                return _transactionManager;
+            }
+        }
         private static void StampaMenu()
         {
             Console.WriteLine("Opzioni disponibili:");
@@ -22,8 +35,8 @@ namespace Esercizi.Net.ConsoleApp
         public static void Main(string[] args)
         {
             string opzione = string.Empty;
-            List<ITransazione> transazioni = new List<ITransazione>();
-            ITransactionFactory factory = new TransactionFactory();
+           // List<ITransazione> transazioni = new List<ITransazione>();
+           // ITransactionFactory factory = new TransactionFactory();
 
             StampaMenu();
 
@@ -32,6 +45,7 @@ namespace Esercizi.Net.ConsoleApp
                 Console.WriteLine();
                 Console.Write("Inserire opzione desiderata: ");
                 opzione = Console.ReadLine();
+                IEnumerable<ITransazione> transazioni = TransazionManager.GetTransactions();
                 switch (opzione)
                 {
                     case "m":
@@ -42,7 +56,9 @@ namespace Esercizi.Net.ConsoleApp
                     case "aggiungi":
                         try
                         {
-                            ITransazione nuovaTransazione = factory.Create();
+                            // ITransazione nuovaTransazione = factory.Create();
+                            ITransazione nuovaTransazione = TransactionManager.CreateTransaction();
+
                             Console.WriteLine();
 
                             Console.Write("Data transazione (MM/gg/aaaa): ");
@@ -58,7 +74,9 @@ namespace Esercizi.Net.ConsoleApp
                             string impTransazione = Console.ReadLine();
                             nuovaTransazione.Importo = decimal.Parse(impTransazione);
 
-                            transazioni.Add(nuovaTransazione);
+                            // transazioni.Add(nuovaTransazione);
+
+                            TransactionManager.SaveTransaction(nuovaTransazione);
                         }
                         catch (Exception e)
                         {
@@ -67,9 +85,10 @@ namespace Esercizi.Net.ConsoleApp
                         break;
                     case "c":
                     case "cancella":
+                        
                         if (transazioni.Count == 0)
                         {
-                            Console.WriteLine("Questa opzione non Ã¨ disponibile. La lista Ã¨ vuota.");
+                            Console.WriteLine("Questa opzione non è disponibile. La lista è vuota.");
                         }
                         else if (transazioni.Count == 1)
                         {
@@ -77,7 +96,8 @@ namespace Esercizi.Net.ConsoleApp
                             opzione = Console.ReadLine();
                             if (opzione == "si")
                             {
-                                transazioni.RemoveAt(0);
+                                //transazioni.RemoveAt(0);
+                                TransactionManager.DeleteTransaction(0);
                                 Console.WriteLine("Elemento cancellato.");
                             }
                             else if (opzione == "no")
@@ -91,7 +111,7 @@ namespace Esercizi.Net.ConsoleApp
                         }
                         else
                         {
-                            Console.Write("Qual'Ã¨ la posizione della transazione che vuoi cancellare? ");
+                            Console.Write("Qual'è la posizione della transazione che vuoi cancellare? ");
                             opzione = Console.ReadLine();
                             try
                             {
@@ -102,7 +122,8 @@ namespace Esercizi.Net.ConsoleApp
                                     opzione = Console.ReadLine();
                                     if (opzione == "si")
                                     {
-                                        transazioni.RemoveAt(posizione - 1);
+                                        //transazioni.RemoveAt(posizione - 1);
+                                        TransactionManager.DeleteTransaction(posizione - 1);
                                         Console.WriteLine("Elemento cancellato.");
                                     }
                                     else if (opzione == "no")
@@ -127,19 +148,20 @@ namespace Esercizi.Net.ConsoleApp
                         break;
                     case "s":
                     case "stampa":
-                        if (transazioni.Count == 0)
+                      //??  IEnumerable<ITransazione> transazione = TransactionManager.CreateTransaction();
+                        if (transazioni.Count() == 0)
                         {
                             Console.WriteLine("Non ci sono transazioni.");
                         }
                         else
                         {
-                            for (int i = 0; i < transazioni.Count; i++)
-                            {
-                                ITransazione transazione = transazioni[i];
-
+                            int i = 0;
+                            foreach (ITransazione transazione in transazioni)
+                            {                       
                                 Console.WriteLine((i + 1) + ":");
                                 Console.WriteLine(transazione);
                                 Console.WriteLine();
+                                i++;
                             }
                         }
                         break;
